@@ -1,2 +1,4 @@
 .env
 api_creds.json
+.cache
+*.csv
