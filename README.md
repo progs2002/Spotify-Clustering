@@ -1,2 +1,2 @@
 # SpotifyGenreClustering
-clustering geres for top 90 tracks 
+clustering genres for top 90 tracks 
