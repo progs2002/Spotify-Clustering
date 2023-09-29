@@ -25,8 +25,46 @@ class SpotifyUser:
                 redirect_uri=self.redirect_uri
             )
         )
-    
-    def get_top_artists(self, limit=90, time_range='long_term', save_to_csv=False):
+
+    def get_track_features(self, track_ids):
+
+        feature_columns = [
+            'acousticness',
+            'danceability',
+            'energy',
+            'instrumentalness',
+            'key',
+            'liveness',
+            'loudness',
+            'mode',
+            'speechiness',
+            'tempo',
+            'time_signature',
+            'valence'
+        ]
+
+        tracks_features = self.sp_client.audio_features(track_ids)
+        tracks_features_df = pd.DataFrame(tracks_features, columns=feature_columns)
+        
+        #fix key
+        keys = ['NotDetected','C','C#','D','Eb','E','F','F#','G','G#','A','Bb','B']
+        tracks_features_df['key'] = tracks_features_df['key'].apply(
+            lambda x: keys[x + 1]
+        )
+
+        #fix mdoe
+        tracks_features_df['mode'] = tracks_features_df['mode'].apply(
+            lambda x: 'Major' if x == 1 else 'minor'
+        )
+
+        #fix time_signature
+        tracks_features_df['time_signature'] = tracks_features_df['time_signature'].apply(
+            lambda x: f'{x}/4'
+        )
+
+        return tracks_features_df
+
+    def get_top_artists(self, limit=90, time_range='long_term', csv_filename=None):
         #spotify api track limit bypass
         if limit <= 50:
             items = self.sp_client.current_user_top_artists(limit=limit, time_range=time_range)['items'] 
@@ -36,15 +74,17 @@ class SpotifyUser:
         
         df = pd.DataFrame(items, columns=['name','genres','popularity'])
 
-        if save_to_csv: 
-            df.to_csv('top_artists.csv')
-            print('top_artists.csv saved to disk')
+        if csv_filename: 
+            df.to_csv(csv_filename)
+            print(csv_filename)
 
         return df
     
-    def get_top_tracks(self, limit=90, time_range='long_term', save_to_csv=False):
+    
+    def get_top_tracks(self, limit=90, time_range='long_term', csv_filename=None):
 
         def get_track_details(item):
+            
             return {
                 'name': item['name'],
                 'artist': item['album']['artists'][0]['name'],
@@ -58,12 +98,17 @@ class SpotifyUser:
             items = self.sp_client.current_user_top_tracks(limit=40, time_range=time_range)['items'] 
             items += self.sp_client.current_user_top_tracks(limit=limit-40, offset=40, time_range=time_range)['items'] 
 
+        track_ids = [item['id'] for item in items]
+        track_features_df = self.get_track_features(track_ids)
+
         items = [get_track_details(item) for item in items]
+        items_df = pd.DataFrame(items)
+
+        df = pd.concat([items_df, track_features_df], axis=1)
         
-        df = pd.DataFrame(items)
-        
-        if save_to_csv: 
-            df.to_csv('top_tracks.csv')
-            print('top_tracks.csv saved to disk')
+        if csv_filename: 
+            df.to_csv(csv_filename)
+            print(csv_filename)
 
         return df
+    

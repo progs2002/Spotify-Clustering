@@ -4,6 +4,6 @@ from userdata import SpotifyUser
 
 if __name__ == '__main__':
     sp = SpotifyUser()
-    sp.get_top_tracks(save_to_csv=True)
-    sp.get_top_artists(save_to_csv=True)
+    sp.get_top_tracks(csv_filename='top_tracks.csv')
+    sp.get_top_artists(csv_filename='top_artists.csv')
 
