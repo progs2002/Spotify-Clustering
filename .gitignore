@@ -2,3 +2,4 @@
 api_creds.json
 .cache
 *.csv
+__pycache__/

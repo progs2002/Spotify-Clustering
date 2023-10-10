@@ -15,7 +15,7 @@ class SpotifyUser:
         
         self.redirect_uri = 'http://localhost:3000'if redirect_uri is None else redirect_uri
         
-        self.scope = "user-library-read user-top-read" if scope is None else scope
+        self.scope = "user-library-read user-top-read playlist-modify-private playlist-modify-public user-read-private" if scope is None else scope
 
         self.sp_client = spotipy.Spotify(
             auth_manager=SpotifyOAuth(
@@ -76,7 +76,7 @@ class SpotifyUser:
 
         if csv_filename: 
             df.to_csv(csv_filename)
-            print(csv_filename)
+            print(f'{csv_filename} written to disk')
 
         return df
     
@@ -89,7 +89,8 @@ class SpotifyUser:
                 'name': item['name'],
                 'artist': item['album']['artists'][0]['name'],
                 'album': item['album']['name'],
-                'popularity': item['popularity']
+                'popularity': item['popularity'],
+                'uri': item['uri']
             }
 
         if limit <= 50:
@@ -107,8 +108,39 @@ class SpotifyUser:
         df = pd.concat([items_df, track_features_df], axis=1)
         
         if csv_filename: 
-            df.to_csv(csv_filename)
-            print(csv_filename)
+            df.drop('uri',axis=1).to_csv(csv_filename)
+            print(f'{csv_filename} written to disk')
 
         return df
-    
+        
+    def create_playlists(self):
+        user_id = self.sp_client.me()['id']
+
+        long_tracks = self.get_top_tracks(time_range='long_term')
+        medium_tracks = self.get_top_tracks(time_range='medium_term')
+        short_tracks = self.get_top_tracks(time_range='short_term')
+        
+        #TODO:
+        #check if playlists exist
+        playlists = self.sp_client.current_user_playlists()['items']
+        is_present = [p['name'] in ['short_term_fav','medium_term_fav','long_term_fav'] for p in playlists]
+
+        if not any(is_present):
+            print('creating playlists')
+            short_pl = self.sp_client.user_playlist_create(user=user_id, name='short_term_fav', public=True)
+            medium_pl = self.sp_client.user_playlist_create(user=user_id, name='medium_term_fav', public=True)
+            long_pl = self.sp_client.user_playlist_create(user=user_id, name='long_term_fav', public=True)
+
+            self.sp_client.playlist_add_items(short_pl['id'], short_tracks['uri'].values.tolist())    
+            self.sp_client.playlist_add_items(medium_pl['id'], medium_tracks['uri'].values.tolist())    
+            self.sp_client.playlist_add_items(long_pl['id'], long_tracks['uri'].values.tolist())
+            print('playlists created, tracks added')    
+        else:
+            print('updating playlists')
+            pl_id = []
+            for i in range(len(is_present)):
+                if is_present[i]:
+                    pl_id.append(playlists[i]['uri'])
+            for p, items in zip(pl_id, [short_tracks, medium_tracks, long_tracks]):
+                self.sp_client.playlist_replace_items(p, items['uri'].values.tolist())
+            print('playlists updated')
