@@ -3,3 +3,5 @@ api_creds.json
 .cache
 *.csv
 __pycache__/
+.ipynb_checkpoints/
+notes.txt
