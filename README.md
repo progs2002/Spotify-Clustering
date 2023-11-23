@@ -51,6 +51,5 @@ Number of clusters si specified with the -k flag, 3 by default.
 python main.py cluster -k 3
 ```
 
-clustering with look something like this 
-
-![Screenshot of 3d plot](assets/screenshot.png)
+Below is a link to a live 3d plot of all my liked songs clustered with k=3  
+[Live 3d plot](https://progs2002.github.io/SpotifyGenreClustering/)
