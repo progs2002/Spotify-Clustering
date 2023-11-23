@@ -1,4 +1,4 @@
-# SpotifyGenreClustering
+# Spotify-Clustering
 
 An ongoing effort to leverage the Spotify API and perform various tasks like :- 
 * gathering the user's top tracks along with audio features and saving it as a csv
@@ -45,7 +45,7 @@ python main.py playlist -t long
 ```
 
 Clustering all liked songs (more tracks are usually needed for clustering)
-Number of clusters si specified with the -k flag, 3 by default.
+Number of clusters is specified with the -k flag, 3 by default.
 
 ```sh
 python main.py cluster -k 3
