@@ -1,5 +1,7 @@
 # Spotify-Clustering
 
+[Live 3d-plot](https://progs2002.github.io/SpotifyGenreClustering/)
+
 An ongoing effort to leverage the Spotify API and perform various tasks like :- 
 * gathering the user's top tracks along with audio features and saving it as a csv
 * gathering the user's top artists 
