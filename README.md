@@ -1,6 +1,6 @@
 # Spotify-Clustering
 
-[Live 3d-plot](https://progs2002.github.io/SpotifyGenreClustering/)
+[Live 3d-plot](https://progs2002.github.io/Spotify-Clustering/)
 
 An ongoing effort to leverage the Spotify API and perform various tasks like :- 
 * gathering the user's top tracks along with audio features and saving it as a csv
@@ -54,4 +54,4 @@ python main.py cluster -k 3
 ```
 
 Below is a link to a live 3d plot of all my liked songs clustered with k=3  
-[Live 3d plot](https://progs2002.github.io/SpotifyGenreClustering/)
+[Live 3d plot](https://progs2002.github.io/Spotify-Clustering/)
