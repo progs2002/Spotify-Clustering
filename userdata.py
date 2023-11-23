@@ -76,7 +76,7 @@ class SpotifyUser:
         df.drop('uri',axis=1).to_csv(csv_filename)
         print(f'{csv_filename} saved to disk')
 
-    def get_top_artists(self, limit=90, time_range='long_term', csv_filename=None):
+    def get_top_artists(self, time_range, limit=90, csv_filename=None):
         #spotify api track limit bypass
         if limit <= 50:
             items = self.sp_client.current_user_top_artists(limit=limit, time_range=time_range)['items'] 
@@ -100,7 +100,7 @@ class SpotifyUser:
             'uri': item['uri']
         }
     
-    def get_top_tracks(self, limit=90, time_range='long_term', csv_filename=None):
+    def get_top_tracks(self, time_range, limit=90, csv_filename=None):
 
         if limit <= 50:
             items = self.sp_client.current_user_top_tracks(limit=limit, time_range=time_range)['items'] 
@@ -121,41 +121,27 @@ class SpotifyUser:
 
         return df
         
-    def create_playlists(self):
+    def create_playlists(self, time_range):
         user_id = self.sp_client.me()['id']
 
-        long_tracks = self.get_top_tracks(time_range='long_term')
-        medium_tracks = self.get_top_tracks(time_range='medium_term')
-        short_tracks = self.get_top_tracks(time_range='short_term')
+        tracks = self.get_top_tracks(time_range=time_range)
 
-        print('saving top tracks to csv')
-        self.save_to_csv(long_tracks, 'long_tracks.csv') 
-        self.save_to_csv(medium_tracks, 'medium_tracks.csv') 
-        self.save_to_csv(short_tracks, 'short_tracks.csv') 
-
-        #check if playlists exist
+        #check if playlist exists
         playlists = self.sp_client.current_user_playlists()['items']
-        playlist_names = ['short_term_fav','medium_term_fav','long_term_fav']
+        playlist_name = f'{time_range}_fav_tracks'
         current_playlist_names = [p['name'] for p in playlists]
-        is_present = set(playlist_names) <= set(current_playlist_names)
+        is_present = playlist_name in current_playlist_names
 
         if not is_present:
-            print('creating playlists')
-            short_pl = self.sp_client.user_playlist_create(user=user_id, name='short_term_fav', public=True)
-            medium_pl = self.sp_client.user_playlist_create(user=user_id, name='medium_term_fav', public=True)
-            long_pl = self.sp_client.user_playlist_create(user=user_id, name='long_term_fav', public=True)
-
-            self.sp_client.playlist_add_items(short_pl['id'], short_tracks['uri'].values.tolist())    
-            self.sp_client.playlist_add_items(medium_pl['id'], medium_tracks['uri'].values.tolist())    
-            self.sp_client.playlist_add_items(long_pl['id'], long_tracks['uri'].values.tolist())
-            print('playlists created, tracks added')    
+            print('creating playlist')
+            pl = self.sp_client.user_playlist_create(user=user_id, name=playlist_name, public=True)
+            self.sp_client.playlist_add_items(pl['id'], tracks['uri'].values.tolist())
+            print('playlist created, tracks added')    
         else:
             print('updating playlists')
-            p_id = {x:current_playlist_names.index(x) for x in playlist_names}
-            
-            for p, items in zip(playlist_names, [short_tracks, medium_tracks, long_tracks]):
-                self.sp_client.playlist_replace_items(playlists[p_id[p]]['uri'], items['uri'].values.tolist())
-            print('playlists updated')
+            p_id = current_playlist_names.index(playlist_name)
+            self.sp_client.playlist_replace_items(playlists[p_id]['uri'], tracks['uri'].values.tolist())
+            print('playlist updated')
 
     def get_liked_songs(self, csv_filename=None):
         songs = []
