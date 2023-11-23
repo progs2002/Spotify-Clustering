@@ -26,6 +26,6 @@ if __name__ == '__main__':
     elif args.mode == 'top_artists':
         sp.get_top_artists(f'{args.t}_term', csv_filename=args.n)
     elif args.mode == 'playlist':
-        sp.create_playlists(f'{args.t}_term')
+        sp.create_playlist(f'{args.t}_term')
     elif args.mode == 'cluster':
         plot_clusters(int(args.k))

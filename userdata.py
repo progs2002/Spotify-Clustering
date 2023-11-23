@@ -73,7 +73,10 @@ class SpotifyUser:
         return tracks_features_df
     
     def save_to_csv(self, df, csv_filename):
-        df.drop('uri',axis=1).to_csv(csv_filename)
+        if 'uri' in df.columns:
+            df = df.drop('uri',axis=1)
+        
+        df.to_csv(csv_filename)
         print(f'{csv_filename} saved to disk')
 
     def get_top_artists(self, time_range, limit=90, csv_filename=None):
@@ -121,7 +124,7 @@ class SpotifyUser:
 
         return df
         
-    def create_playlists(self, time_range):
+    def create_playlist(self, time_range):
         user_id = self.sp_client.me()['id']
 
         tracks = self.get_top_tracks(time_range=time_range)
