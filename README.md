@@ -4,7 +4,7 @@
 
 An ongoing effort to leverage the Spotify API and perform various tasks like :- 
 * gathering the user's top tracks along with audio features and saving it as a csv
-* gathering the user's top artists 
+* gathering the user's top artists and saving it as a csv
 * creating a playlist of top tracks 
 * getting all liked songs, creating feature vectors and clustering them in 3d (using t-SNE and k-means)
 
